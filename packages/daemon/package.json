@@ -1,0 +1,14 @@
+{
+  "name": "@codexnamer/daemon",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "codexnamer-daemon": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@codexnamer/core": "0.1.0",
+    "chokidar": "^4.0.3"
+  }
+}

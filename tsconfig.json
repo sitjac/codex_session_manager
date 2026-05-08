@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/cli"
+    },
+    {
+      "path": "./packages/daemon"
+    },
+    {
+      "path": "./packages/api"
+    },
+    {
+      "path": "./packages/web"
+    },
+    {
+      "path": "./packages/tui"
+    }
+  ]
+}

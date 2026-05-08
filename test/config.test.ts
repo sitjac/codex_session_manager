@@ -1,0 +1,178 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { loadConfigView, loadEffectiveConfig, writeUserConfig } from "@codexnamer/core";
+import { REDACTED_SECRET } from "@codexnamer/shared";
+import { afterEach, describe, expect, it } from "vitest";
+
+const tempDirs: string[] = [];
+const originalHome = process.env.HOME;
+
+async function makeTempDir(): Promise<string> {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "csm-config-"));
+  tempDirs.push(dir);
+  return dir;
+}
+
+afterEach(async () => {
+  process.env.HOME = originalHome;
+  await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
+});
+
+describe("config loading", () => {
+  it("loads inherited Codex auth.json and manual provider api_key", async () => {
+    const root = await makeTempDir();
+    const codexHome = path.join(root, ".codex");
+    const configPath = path.join(root, "config.toml");
+
+    await fs.mkdir(codexHome, { recursive: true });
+    await fs.writeFile(
+      path.join(codexHome, "config.toml"),
+      [
+        'model_provider = "OpenAI"',
+        'model = "gpt-5.4"',
+        "",
+        "[model_providers.OpenAI]",
+        'base_url = "http://relay.test/v1"',
+        'wire_api = "responses"',
+        "requires_openai_auth = true",
+      ].join("\n"),
+      "utf8",
+    );
+    await fs.writeFile(
+      path.join(codexHome, "auth.json"),
+      JSON.stringify({
+        auth_mode: "apikey",
+        OPENAI_API_KEY: "codex-file-key",
+      }),
+      "utf8",
+    );
+    await fs.writeFile(
+      configPath,
+      [
+        "[general]",
+        `codex_home = "${codexHome}"`,
+        `state_dir = "${path.join(root, "state")}"`,
+        "",
+        "[provider.default]",
+        'request_type = "responses"',
+        'display_name = "default"',
+        'base_url = "http://manual.test/v1"',
+        'model = "gpt-manual"',
+        'api_key = "manual-key"',
+      ].join("\n"),
+      "utf8",
+    );
+
+    const effective = await loadEffectiveConfig({
+      cwd: root,
+      configPath,
+    });
+
+    expect(effective.inheritedCodex.auth?.authMode).toBe("apikey");
+    expect(effective.inheritedCodex.auth?.openaiApiKey).toBe("codex-file-key");
+    expect(effective.providerProfiles[0]?.apiKey).toBe("manual-key");
+  });
+
+  it("preserves provider api keys when config patch uses redacted placeholder", async () => {
+    const root = await makeTempDir();
+    const codexHome = path.join(root, ".codex");
+    const configPath = path.join(root, "config.toml");
+
+    await fs.mkdir(codexHome, { recursive: true });
+    await fs.writeFile(
+      path.join(codexHome, "config.toml"),
+      'model_provider = "OpenAI"\nmodel = "gpt-5.4"\n',
+    );
+    await fs.writeFile(
+      configPath,
+      [
+        "[general]",
+        `codex_home = "${codexHome}"`,
+        `state_dir = "${path.join(root, "state")}"`,
+        "",
+        "[provider.default]",
+        'request_type = "responses"',
+        'display_name = "default"',
+        'base_url = "http://manual.test/v1"',
+        'model = "gpt-manual"',
+        'api_key = "keep-me"',
+      ].join("\n"),
+      "utf8",
+    );
+
+    await writeUserConfig({
+      cwd: root,
+      configPath,
+      patch: {
+        naming: {
+          maxLength: 48,
+          contextStrategy: "user-assistant-transcript",
+          contextMaxChars: 4096,
+          compositionMode: "prompt-override",
+          builder: [
+            { type: "component", component: "tag" },
+            { type: "separator", value: " / " },
+            { type: "component", component: "summary" },
+          ],
+          tags: [
+            {
+              id: "settings",
+              label: "设置",
+              description: "配置与设置问题",
+              promptHint: "config settings save",
+            },
+          ],
+          customPrompt: "Always classify the session before naming it.",
+        },
+        providerProfiles: [
+          {
+            profileId: "default",
+            requestType: "responses",
+            displayName: "default",
+            baseUrl: "http://manual.test/v1",
+            model: "gpt-next",
+            apiKey: REDACTED_SECRET,
+            enabled: true,
+            isDefault: true,
+          },
+        ],
+      },
+    });
+
+    const effective = await loadEffectiveConfig({
+      cwd: root,
+      configPath,
+    });
+    const view = await loadConfigView({
+      cwd: root,
+      configPath,
+      effectiveConfig: effective,
+    });
+    const written = await fs.readFile(configPath, "utf8");
+
+    expect(effective.naming.maxLength).toBe(48);
+    expect(effective.naming.contextStrategy).toBe("user-assistant-transcript");
+    expect(effective.naming.contextMaxChars).toBe(4096);
+    expect(effective.naming.compositionMode).toBe("prompt-override");
+    expect(effective.naming.builder).toEqual([
+      { type: "component", component: "tag" },
+      { type: "separator", value: " / " },
+      { type: "component", component: "summary" },
+    ]);
+    expect(effective.naming.tags).toHaveLength(1);
+    expect(effective.naming.tags[0]?.id).toBe("settings");
+    expect(effective.naming.customPrompt).toBe("Always classify the session before naming it.");
+    expect(effective.providerProfiles[0]?.apiKey).toBe("keep-me");
+    expect(view.userConfig.providerProfiles?.[0]?.apiKey).toBe(REDACTED_SECRET);
+    expect(written).toContain('api_key = "keep-me"');
+    expect(written).toContain('model = "gpt-next"');
+    expect(written).toContain('context_strategy = "user-assistant-transcript"');
+    expect(written).toContain("context_max_chars = 4_096");
+    expect(written).toContain('composition_mode = "prompt-override"');
+    expect(written).toContain("[[naming.builder]]");
+    expect(written).toContain('component = "tag"');
+    expect(written).toContain('value = " / "');
+    expect(written).toContain('custom_prompt = "Always classify the session before naming it."');
+  });
+});
