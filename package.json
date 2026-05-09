@@ -1,0 +1,60 @@
+{
+  "name": "codexnamer",
+  "version": "0.1.0",
+  "description": "sitJac/codex-session-manager is a local-first Codex session browser with manual rename and delete support.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "keywords": [
+    "codex",
+    "session",
+    "rename",
+    "sqlite",
+    "webui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sitJac/codex-session-manager.git"
+  },
+  "homepage": "https://github.com/sitJac/codex-session-manager#readme",
+  "bugs": {
+    "url": "https://github.com/sitJac/codex-session-manager/issues"
+  },
+  "author": "sitJac",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:runtime": "tsc -b packages/shared packages/core packages/api packages/cli",
+    "clean": "rm -rf packages/*/dist packages/*/dist-ts packages/*/*.tsbuildinfo coverage",
+    "cli": "npm run build:runtime && node packages/cli/dist/index.js",
+    "api": "npm run build:runtime && node packages/api/dist/index.js",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "validate:full": "npm run lint && npm run build && npm run build:runtime && npm run web:build && npm test",
+    "check": "npm run validate:full",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "prepare": "node scripts/install-hooks.mjs",
+    "serve": "npm run build:runtime && npm run web:build && node packages/cli/dist/index.js serve",
+    "web": "tsx scripts/launch-ui.ts web",
+    "web:raw": "npm run dev --workspace @codexnamer/web",
+    "web:build": "npm run build --workspace @codexnamer/web",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.11",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.6.0",
+    "lefthook": "^2.1.5",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
