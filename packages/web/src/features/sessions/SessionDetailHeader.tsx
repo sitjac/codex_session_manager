@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { ThemeMode } from "../../app-shell/useThemeMode.js";
 import { formatWhen, sessionDisplayTitle } from "../../browser-utils.js";
 import type { t } from "../../i18n.js";
 import type { SessionDetail } from "../../types.js";
@@ -8,12 +9,11 @@ export function SessionDetailHeader(props: {
   focusMode: boolean;
   actioning: boolean;
   actionLabel: string | null;
-  sessionPaneToggleLabel: string;
+  themeMode: ThemeMode;
   uiLanguage: "en-US" | "zh-CN";
   tt: (key: Parameters<typeof t>[1]) => string;
   onExitFocusMode: () => void;
-  onEnterFocusMode: () => void;
-  onToggleSessionPane: () => void;
+  onToggleThemeMode: () => void;
   onRename: (name: string) => boolean | Promise<boolean>;
 }) {
   const actionLabelLower = props.actionLabel?.toLowerCase();
@@ -133,25 +133,23 @@ export function SessionDetailHeader(props: {
         </div>
         <div className="chat-header-right">
           {!props.focusMode ? (
-            <>
-              <button
-                aria-label={props.tt("focusSession")}
-                className="btn-sm btn-icon"
-                onClick={props.onEnterFocusMode}
-                title={props.tt("focusSession")}
-                type="button"
-              >
-                <span aria-hidden="true">⤢</span>
-              </button>
-              <button
-                className="btn-sm"
-                onClick={props.onToggleSessionPane}
-                title={props.sessionPaneToggleLabel}
-                type="button"
-              >
-                {props.sessionPaneToggleLabel}
-              </button>
-            </>
+            <button
+              aria-label={
+                props.themeMode === "dark"
+                  ? props.tt("switchToLightMode")
+                  : props.tt("switchToDarkMode")
+              }
+              className="btn-sm btn-icon"
+              onClick={props.onToggleThemeMode}
+              title={
+                props.themeMode === "dark"
+                  ? props.tt("switchToLightMode")
+                  : props.tt("switchToDarkMode")
+              }
+              type="button"
+            >
+              <span aria-hidden="true">{props.themeMode === "dark" ? "☀" : "☾"}</span>
+            </button>
           ) : null}
         </div>
       </div>

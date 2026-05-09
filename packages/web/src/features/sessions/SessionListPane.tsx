@@ -51,7 +51,6 @@ export function SessionListPane(props: {
   onSelectSession: (threadId: string) => void;
   onCopySessionId: (threadId: string) => void | Promise<void>;
   onDeleteSession: (threadId: string) => boolean | Promise<boolean>;
-  onToggleSessionPane: () => void;
 }) {
   const [contextMenu, setContextMenu] = React.useState<{
     threadId: string;
@@ -74,9 +73,6 @@ export function SessionListPane(props: {
     (key: Parameters<typeof t>[1]) => t(props.uiLanguage, key),
     [props.uiLanguage],
   );
-  const sessionPaneToggleLabel = props.sessionPaneCollapsed
-    ? tt("showSessions")
-    : tt("hideSessions");
   const selectedWorkspaceId = React.useMemo(
     () =>
       props.selectedId
@@ -271,14 +267,6 @@ export function SessionListPane(props: {
           </p>
         </div>
         <div className="header-actions">
-          <button
-            className="btn-sm"
-            onClick={props.onToggleSessionPane}
-            title={sessionPaneToggleLabel}
-            type="button"
-          >
-            {sessionPaneToggleLabel}
-          </button>
           <button
             className="btn-refresh"
             onClick={props.onRefresh}

@@ -41,6 +41,7 @@
     "check": "npm run validate:full",
     "hooks:install": "node scripts/install-hooks.mjs",
     "prepare": "node scripts/install-hooks.mjs",
+    "server": "npm run serve",
     "serve": "npm run build:runtime && npm run web:build && node packages/cli/dist/index.js serve",
     "web": "tsx scripts/launch-ui.ts web",
     "web:raw": "npm run dev --workspace @codexnamer/web",

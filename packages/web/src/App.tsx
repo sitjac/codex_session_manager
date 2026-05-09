@@ -1,6 +1,7 @@
 import * as React from "react";
 import { TopNoticeBanner } from "./app-shell/TopNoticeBanner.js";
 import { usePaneLayoutState } from "./app-shell/usePaneLayoutState.js";
+import { useThemeMode } from "./app-shell/useThemeMode.js";
 import { copyTextToClipboard } from "./clipboard.js";
 import { normalizeUiLanguage, t } from "./i18n.js";
 import { SessionBrowser } from "./SessionBrowser.js";
@@ -12,6 +13,7 @@ export function App() {
     tab: state.tab,
     selectedId: state.selectedId,
   });
+  const theme = useThemeMode();
   const uiLanguage = normalizeUiLanguage(state.configView);
 
   React.useEffect(() => {
@@ -67,7 +69,6 @@ export function App() {
           loadingSessions={state.loadingSessions}
           onCopySessionId={(threadId) => void handleCopySessionId(threadId)}
           onDeleteSession={(threadId) => state.actions.delete(threadId)}
-          onEnterFocusMode={() => paneLayout.setSessionFocusMode(true)}
           onExitFocusMode={() => paneLayout.setSessionFocusMode(false)}
           onRefresh={() => void state.refreshSessions()}
           onRename={(name) => state.actions.rename(name)}
@@ -75,12 +76,13 @@ export function App() {
           onSelectSession={(threadId) => state.setSelectedId(threadId)}
           onSessionPaneWidthChange={paneLayout.handleSessionPaneWidthChange}
           onStartSessionResize={paneLayout.startSessionResize}
-          onToggleSessionPane={paneLayout.toggleSessionPane}
+          onToggleThemeMode={theme.toggleThemeMode}
           search={state.search}
           selectedId={state.selectedId}
           sessionPaneCollapsed={paneLayout.sessionPaneCollapsed}
           sessionPaneWidth={paneLayout.sessionPaneWidth}
           sessions={state.sessions}
+          themeMode={theme.themeMode}
           uiLanguage={uiLanguage}
         />
       </main>

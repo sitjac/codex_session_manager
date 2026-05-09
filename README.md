@@ -1,4 +1,4 @@
-# sitJac/codex-session-manager
+# codex-session-manager
 
 本项目是一个本地优先的 Codex session 管理器，用来浏览、重命名和删除本机 Codex 会话，并让 UI 中的 session 名称和 Codex CLI `/resume` 中看到的名称保持一致。
 
@@ -98,4 +98,4 @@ scripts           开发辅助脚本
 
 ## 设计取向
 
-sitJac/codex-session-manager 只做本地会话管理，不接管 Codex 本身。当前主线优先保证三件事：session 名称可手动维护、工作区内的会话清晰可读、UI 和 Codex CLI 看到的状态一致。
+codex-session-manager 只做本地会话管理，不接管 Codex 本身。当前主线优先保证三件事：session 名称可手动维护、工作区内的会话清晰可读、UI 和 Codex CLI 看到的状态一致。

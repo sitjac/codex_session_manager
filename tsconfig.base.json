@@ -14,11 +14,10 @@
     "declarationMap": true,
     "sourceMap": true,
     "composite": true,
-    "baseUrl": ".",
     "paths": {
-      "@codexnamer/api": ["packages/api/src/index.ts"],
-      "@codexnamer/shared": ["packages/shared/src/index.ts"],
-      "@codexnamer/core": ["packages/core/src/index.ts"]
+      "@codexnamer/api": ["./packages/api/src/index.ts"],
+      "@codexnamer/shared": ["./packages/shared/src/index.ts"],
+      "@codexnamer/core": ["./packages/core/src/index.ts"]
     }
   }
 }

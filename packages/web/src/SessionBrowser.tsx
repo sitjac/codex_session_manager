@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { ThemeMode } from "./app-shell/useThemeMode.js";
 import { SessionDetailHeader } from "./features/sessions/SessionDetailHeader.js";
 import { SessionListPane } from "./features/sessions/SessionListPane.js";
 import type { UiLanguage } from "./i18n.js";
@@ -25,14 +26,14 @@ export function SessionBrowser(props: {
   actionLabel: string | null;
   error: string | null;
   uiLanguage: UiLanguage;
+  themeMode: ThemeMode;
   onSearchChange: (value: string) => void;
   onRefresh: () => void;
   onSelectSession: (threadId: string) => void;
   onCopySessionId: (threadId: string) => void | Promise<void>;
   onDeleteSession: (threadId: string) => boolean | Promise<boolean>;
-  onEnterFocusMode: () => void;
   onExitFocusMode: () => void;
-  onToggleSessionPane: () => void;
+  onToggleThemeMode: () => void;
   onSessionPaneWidthChange: (delta: number) => void;
   onStartSessionResize: (event: React.PointerEvent<HTMLDivElement>) => void;
   onRename: (name: string) => boolean | Promise<boolean>;
@@ -41,9 +42,6 @@ export function SessionBrowser(props: {
     (key: Parameters<typeof t>[1]) => t(props.uiLanguage, key),
     [props.uiLanguage],
   );
-  const sessionPaneToggleLabel = props.sessionPaneCollapsed
-    ? tt("showSessions")
-    : tt("hideSessions");
 
   const handleSessionSplitterKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -91,7 +89,6 @@ export function SessionBrowser(props: {
         onRefresh={props.onRefresh}
         onSearchChange={props.onSearchChange}
         onSelectSession={props.onSelectSession}
-        onToggleSessionPane={props.onToggleSessionPane}
         search={props.search}
         selectedId={props.selectedId}
         sessionPaneCollapsed={props.sessionPaneCollapsed}
@@ -129,12 +126,11 @@ export function SessionBrowser(props: {
                 actioning={props.actioning}
                 detail={props.detail}
                 focusMode={props.focusMode}
-                onEnterFocusMode={props.onEnterFocusMode}
                 onExitFocusMode={props.onExitFocusMode}
                 onRename={props.onRename}
-                onToggleSessionPane={props.onToggleSessionPane}
-                sessionPaneToggleLabel={sessionPaneToggleLabel}
+                onToggleThemeMode={props.onToggleThemeMode}
                 tt={tt}
+                themeMode={props.themeMode}
                 uiLanguage={props.uiLanguage}
               />
 
@@ -155,11 +151,6 @@ export function SessionBrowser(props: {
         ) : (
           <div className="history-empty">
             <p>{tt("selectSessionHint")}</p>
-            <div className="history-empty-actions">
-              <button className="btn-sm" onClick={props.onToggleSessionPane} type="button">
-                {tt("showSessions")}
-              </button>
-            </div>
           </div>
         )}
       </section>
