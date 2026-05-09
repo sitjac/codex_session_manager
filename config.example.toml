@@ -1,0 +1,12 @@
+# Copy this file to ~/.config/codexnamer/config.toml and edit from there.
+# This starter config only controls local session manager paths and UI language.
+
+[general]
+# Usually you can keep the default Codex home.
+codex_home = "~/.codex"
+
+# sitJac/codex-session-manager keeps its own SQLite state and runtime files here.
+state_dir = "~/.local/state/codexnamer"
+
+# UI language for Web and CLI messages.
+ui_language = "zh-CN"
